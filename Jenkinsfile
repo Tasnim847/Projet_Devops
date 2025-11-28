@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('📥 Git Clone') {
             steps {
-                git branch: 'MohamedYoussefMellouli', 
+                git branch: 'Tasnim', 
                     url: 'https://github.com/Tasnim847/Projet_Devops.git'
                 sh 'echo "✅ Code source récupéré avec succès"'
             }
