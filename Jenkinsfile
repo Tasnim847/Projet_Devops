@@ -2,76 +2,68 @@ pipeline {
     agent any
     
     stages {
+
         stage('📥 Git Clone') {
             steps {
-                git branch: 'Tasnim', 
+                git branch: 'Tasnim',
                     url: 'https://github.com/Tasnim847/Projet_Devops.git'
+                
                 sh 'echo "✅ Code source récupéré avec succès"'
             }
         }
 
-        stage('🔍 Certification & Vérification') {
+        stage('🔍 Vérification des outils') {
             steps {
-                echo '🔍 Vérification des outils...'
-                sh 'ls -la'
+                echo '🔍 Vérification...'
                 sh 'mvn --version'
-                sh 'docker --version'
                 sh 'java -version'
-                sh 'echo "✅ Tous les outils sont installés"'
+                sh 'echo "✅ Outils OK"'
             }
         }
 
-        stage('🏗️ Build Application') {
+        stage('🏗️ Build') {
             steps {
-                echo '🏗️ Compilation du projet...'
+                echo '🏗️ Compilation...'
                 sh 'mvn clean compile'
-                sh 'echo "✅ Application compilée avec succès"'
+                sh 'echo "✅ Build réussi"'
             }
         }
 
-        stage('📦 Package Application') {
+        stage('🧪 Tests') {
             steps {
-                echo '📦 Création du package JAR...'
+                echo '🧪 Exécution des tests...'
+                sh 'mvn test'
+                sh 'echo "✅ Tests terminés avec succès"'
+            }
+        }
+
+        stage('📦 Package (.jar)') {
+            steps {
+                echo '📦 Création du JAR...'
                 sh 'mvn package -DskipTests'
-                
-                echo '✅ Vérification des artefacts...'
-                sh 'ls -la target/*.jar'
-                sh 'echo "✅ JAR créé avec succès"'
-            }
-        }
 
-        stage('🐳 Docker Container Trace') {
-            steps {
-                echo '🔍 Trace des conteneurs Docker...'
-                sh '''
-                    echo "=== LISTE DES CONTENEURS ==="
-                    docker ps -a
-                    echo ""
-                    echo "=== LISTE DES IMAGES ==="
-                    docker images
-                    echo ""
-                    echo "=== STATUT DOCKER ==="
-                    docker info | head -10
-                    echo "✅ Trace Docker terminée"
-                '''
+                echo '📁 Vérification des artefacts...'
+                sh 'ls -la target/*.jar'
+
+                sh 'echo "🎉 JAR créé avec succès !"'
             }
         }
     }
-    
+
     post {
         always {
-            echo '📊 Pipeline execution terminée'
+            echo '📊 Fin du pipeline'
         }
         success {
-            echo '🎉 SUCCÈS! Pipeline CI complété avec succès!'
-            archiveArtifacts 'target/*.jar'
-            sh 'echo "📦 JAR archivé - Prêt pour le déploiement futur"'
+            echo '🎉 Pipeline terminé avec succès !'
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
         }
         failure {
-            echo '❌ ÉCHEC du pipeline!'
+            echo '❌ Le pipeline a échoué'
         }
         cleanup {
             sh 'echo "🧹 Nettoyage terminé"'
         }
     }
 }
+
