@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     stages {
-        stage('📥 Git Clone') {
+        stage('📥 1.  Git Clone') {
             steps {
                 git branch: 'Tasnim', 
                     url: 'https://github.com/Tasnim847/Projet_Devops.git'
@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('🏗️ Build Application') {
+        stage('🏗️  2. Build Application') {
             steps {
                 echo '🏗️ Compilation du projet...'
                 sh 'mvn clean compile'
@@ -29,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('🧪 Tests avec Base de Données') {
+        stage('🧪 3. Tests avec Base de Données') {
             steps {
                 echo '🧪 Démarrage de MySQL pour les tests...'
                 sh '''
@@ -81,7 +81,7 @@ pipeline {
             }
         }
 
-        stage('📦 4) Package Application') {
+        stage('📦 4. Package Application') {
             steps {
                 echo '📦 Création du package JAR...'
                 sh 'mvn package -DskipTests'
@@ -92,7 +92,7 @@ pipeline {
             }
         }
         
-        stage('🔍 5) SonarQube Analysis') {
+        stage('🔍 5. SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
                     sh '''
