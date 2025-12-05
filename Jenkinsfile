@@ -91,6 +91,19 @@ pipeline {
                 sh 'echo "✅ JAR créé avec succès"'
             }
         }
+        
+        stage('🔍 5) SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                        echo "🔍 Analyse SonarQube"
+                        mvn sonar:sonar -Dsonar.projectKey=Devops \
+                                        -Dsonar.host.url=http://192.168.217.135:9000 \
+                                        -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+        }
     }
     
     post {
