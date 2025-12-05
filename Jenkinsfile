@@ -81,7 +81,7 @@ pipeline {
             }
         }
 
-        stage('📦 Package Application') {
+        stage('📦 4) Package Application') {
             steps {
                 echo '📦 Création du package JAR...'
                 sh 'mvn package -DskipTests'
