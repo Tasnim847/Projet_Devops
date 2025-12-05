@@ -33,66 +33,56 @@ pipeline {
             steps {
                 echo '🧪 Démarrage de MySQL pour les tests...'
                 sh '''
-                    # Démarrer un conteneur MySQL
-                    docker run -d \\
-                        --name test-mysql \\
-                        -e MYSQL_ROOT_PASSWORD=root \\
-                        -e MYSQL_DATABASE=student_db \\
-                        -e MYSQL_USER=testuser \\
-                        -e MYSQL_PASSWORD=testpass \\
-                        -p 3306:3306 \\
+                    docker run -d \
+                        --name test-mysql \
+                        -e MYSQL_ROOT_PASSWORD=root \
+                        -e MYSQL_DATABASE=student_db \
+                        -e MYSQL_USER=testuser \
+                        -e MYSQL_PASSWORD=testpass \
+                        -p 3306:3306 \
                         mysql:8.0
                     
                     echo "⏳ Attente du démarrage de MySQL..."
                     sleep 30
                     
-                    # Vérifier que MySQL est opérationnel
                     docker exec test-mysql mysqladmin ping -h localhost -u root -proot || sleep 10
                     
-                    echo "✅ MySQL démarré avec succès"
-                    echo "📊 Base de données créée: student_db"
+                    echo "✅ MySQL démarré"
                 '''
-                
-                echo '🧪 Exécution des tests avec base de données...'
+
+                echo '🧪 Exécution des tests unitaires...'
                 sh '''
-                    mvn test \\
-                        -Dspring.datasource.url=jdbc:mysql://localhost:3306/student_db \\
-                        -Dspring.datasource.username=root \\
-                        -Dspring.datasource.password=root \\
-                        -Dspring.jpa.hibernate.ddl-auto=update \\
-                        -Dspring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+                    mvn test \
+                        -Dspring.datasource.url=jdbc:mysql://localhost:3306/student_db \
+                        -Dspring.datasource.username=root \
+                        -Dspring.datasource.password=root
                 '''
-                
-                sh 'echo "✅ Tests exécutés avec succès avec base de données"'
             }
             post {
                 always {
                     junit 'target/surefire-reports/*.xml'
                     sh 'echo "📊 Rapports de tests générés"'
-                    
-                    // Nettoyage de la base de données de test
                     sh '''
-                        echo "🧹 Nettoyage du conteneur MySQL..."
+                        echo "🧹 Suppression conteneur MySQL..."
                         docker stop test-mysql || true
                         docker rm test-mysql || true
-                        echo "✅ Base de données de test nettoyée"
                     '''
                 }
             }
         }
 
-        stage('📦 Package Application') {
+        stage('🐳 Build Docker Image') {
             steps {
-                echo '📦 Création du package JAR...'
-                sh 'mvn package -DskipTests'
-                
-                echo '✅ Vérification des artefacts...'
-                sh 'ls -la target/*.jar'
-                sh 'echo "✅ JAR créé avec succès"'
+                echo '🐳 Construction de l’image Docker...'
+                sh '''
+                    docker build -t tasnim847/student-app:1.0 .
+                    echo "✅ Image Docker créée"
+                    docker images | grep student-app
+                '''
             }
         }
-        
-        stage('🔍 5) SonarQube Analysis') {
+
+        stage('🔍 Analyse SonarQube') {
             steps {
                 withCredentials([string(credentialsId: 'jenkins_sonar', variable: 'SONAR_TOKEN')]) {
                     sh '''
@@ -104,15 +94,24 @@ pipeline {
                 }
             }
         }
+
+        stage('📦 Package Application (JAR Final)') {
+            steps {
+                echo '📦 Packaging du projet...'
+                sh 'mvn package -DskipTests'
+                
+                echo '📄 Vérification du JAR...'
+                sh 'ls -la target/*.jar'
+                sh 'echo "🎉 JAR final créé avec succès"'
+            }
+        }
     }
     
     post {
         always {
             echo '📊 Pipeline execution terminée'
-            
-            // Nettoyage garantie même en cas d'échec
             sh '''
-                echo "🧹 Nettoyage final des conteneurs..."
+                echo "🧹 Nettoyage final..."
                 docker stop test-mysql || true
                 docker rm test-mysql || true
             '''
@@ -120,7 +119,6 @@ pipeline {
         success {
             echo '🎉 SUCCÈS! Pipeline CI complété avec succès!'
             archiveArtifacts 'target/*.jar'
-            sh 'echo "📦 JAR archivé - Prêt pour le déploiement futur"'
         }
         failure {
             echo '❌ ÉCHEC du pipeline!'
@@ -130,3 +128,4 @@ pipeline {
         }
     }
 }
+
