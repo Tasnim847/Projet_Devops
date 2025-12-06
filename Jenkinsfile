@@ -83,19 +83,20 @@ pipeline {
         }
 
 stage('🚀 Push Docker Image') {
-            steps {
+    steps {
         withCredentials([usernamePassword(
             credentialsId: 'dockerhub_creds',
-            usernameVariable: 'tasnim847',
-            passwordVariable: 'Tass1234,,'
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
         )]) {
             sh '''
                 echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                docker push tasnim847/student-app:1.0.0
+                docker push tasnim847/student-app:1.0
             '''
         }
     }
 }
+
 
         stage('🔍 Analyse SonarQube') {
             steps {
