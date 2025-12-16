@@ -1,7 +1,11 @@
-FROM alpine
+FROM alpine:latest
 
-RUN apk add openjdk17
+RUN apk add --no-cache openjdk17
 
-EXPOSE 80
+WORKDIR /app
 
-CMD "java"
+COPY target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

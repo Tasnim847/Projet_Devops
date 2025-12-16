@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql-service:3306/springdb
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2025-12-11T17:53:41Z"
+  name: spring-config
+  namespace: devops
+  resourceVersion: "31115"
+  uid: 59fccfe8-1690-402d-a4a7-0e63edffd9d9
