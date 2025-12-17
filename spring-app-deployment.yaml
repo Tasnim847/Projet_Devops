@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: spring-app
-        image: tasnim847/student-app:1.0.2
+        image: tasnim847/student-app:1.0.4
         ports:
         - containerPort: 8089
         env:
